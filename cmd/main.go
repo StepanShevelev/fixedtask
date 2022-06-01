@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	api "github.com/StepanShevelev/fixedtask/api"
 	mydb "github.com/StepanShevelev/fixedtask/db"
 	"net/http"
@@ -17,11 +18,13 @@ func main() {
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
-
+	fmt.Println("starting server")
 	mydb.ConnectToDb()
+	fmt.Println("connected to db")
 	api.InitBackendApi()
+	fmt.Println("initialised routing")
 
-	api.ShowSkill("Dog")
+	//api.ShowSkill("Dog")
 
 	http.ListenAndServe(":8000", nil)
 }

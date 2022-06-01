@@ -23,7 +23,7 @@ func apiUpdateCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, okId := parseId(w, r)
+	id, okId := ParseId(w, r)
 	if !okId {
 		return
 	}
@@ -49,7 +49,7 @@ func apiGetAllCategories(w http.ResponseWriter, r *http.Request) {
 	if !okCats {
 		return
 	}
-	sendData(categories, w)
+	SendData(categories, w)
 }
 
 func getCategories(w http.ResponseWriter) ([]mydb.Category, bool) {
@@ -70,7 +70,7 @@ func apiGetCategory(w http.ResponseWriter, r *http.Request) {
 	if !isMethodGET(w, r) {
 		return
 	}
-	categoryId, okId := parseId(w, r)
+	categoryId, okId := ParseId(w, r)
 	if !okId {
 		return
 	}
@@ -79,7 +79,7 @@ func apiGetCategory(w http.ResponseWriter, r *http.Request) {
 	if !okCat {
 		return
 	}
-	sendData(category, w)
+	SendData(category, w)
 }
 
 func getCategoryById(categoryId int, w http.ResponseWriter) (*mydb.Category, bool) {
@@ -100,7 +100,7 @@ func apiDeleteCategory(w http.ResponseWriter, r *http.Request) {
 	if !isMethodDELETE(w, r) {
 		return
 	}
-	id, okId := parseId(w, r)
+	id, okId := ParseId(w, r)
 	if !okId {
 		return
 	}
@@ -119,6 +119,17 @@ func apiUserAddCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	mydb.AddCategory(r)
+	var user mydb.User
+	var category mydb.Category
+	//
+	//
+	//
+	mydb.Database.Db.Model(&category).Association("Users").Append(&user)
+	//
+	//
+	//
+	//
+
 }
 
 func apiUserDeleteCategory(w http.ResponseWriter, r *http.Request) {

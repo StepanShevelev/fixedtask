@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	mydb "github.com/StepanShevelev/fixedtask/db"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -22,7 +21,7 @@ func apiUpdatePet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, okId := parseId(w, r)
+	id, okId := ParseId(w, r)
 	if !okId {
 		return
 	}
@@ -48,7 +47,7 @@ func apiGetAllPets(w http.ResponseWriter, r *http.Request) {
 	if !okPets {
 		return
 	}
-	sendData(pets, w)
+	SendData(pets, w)
 }
 
 func getPets(w http.ResponseWriter) ([]mydb.Pet, bool) {
@@ -69,7 +68,7 @@ func apiGetPet(w http.ResponseWriter, r *http.Request) {
 	if !isMethodGET(w, r) {
 		return
 	}
-	petId, okId := parseId(w, r)
+	petId, okId := ParseId(w, r)
 	if !okId {
 		return
 	}
@@ -78,7 +77,7 @@ func apiGetPet(w http.ResponseWriter, r *http.Request) {
 	if !okPet {
 		return
 	}
-	sendData(pet, w)
+	SendData(pet, w)
 }
 
 func getPetById(petId int, w http.ResponseWriter) (*mydb.Pet, bool) {
@@ -99,7 +98,7 @@ func apiDeletePet(w http.ResponseWriter, r *http.Request) {
 	if !isMethodDELETE(w, r) {
 		return
 	}
-	id, okId := parseId(w, r)
+	id, okId := ParseId(w, r)
 	if !okId {
 		return
 	}
@@ -113,12 +112,12 @@ func apiDeletePet(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func ShowSkill(name string) {
-	var pet mydb.Pet
-	mydb.Database.Db.Where("name = ?", name).First(&pet)
-	fmt.Printf("%d counter\n", pet.Counter)
-	fmt.Printf("%s показывает что умеет\n", name)
-	pet.Counter += 1
-	fmt.Printf("%d counter\n", pet.Counter)
-	mydb.Database.Db.Save(&pet)
-}
+//func ShowSkill(name string) {
+//	var pet mydb.Pet
+//	mydb.Database.Db.Where("name = ?", name).First(&pet)
+//	fmt.Printf("%d counter\n", pet.Counter)
+//	fmt.Printf("%s показывает что умеет\n", name)
+//	pet.Counter += 1
+//	fmt.Printf("%d counter\n", pet.Counter)
+//	mydb.Database.Db.Save(&pet)
+//}

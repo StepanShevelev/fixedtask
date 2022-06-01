@@ -31,14 +31,16 @@ func ConnectToDb() {
 	}
 }
 
-func CreateUser(r *http.Request) {
-	var user *User
+func CreateUser(r *http.Request, user *User) {
+	//var user *User
 
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		return
-	}
+	//err := json.NewDecoder(r.Body).Decode(&user)
+	//if err != nil {
+	//	return
+	//}
+
 	Database.Db.Create(&user)
+
 }
 
 func FindUserById(Id int) (*User, error) {

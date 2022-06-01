@@ -13,7 +13,19 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 	if !isMethodPOST(w, r) {
 		return
 	}
-	mydb.CreateUser(r)
+
+	var user *mydb.User
+
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		w.Write([]byte("an error occurred while decoding json"))
+		return
+	}
+
+	mydb.CreateUser(r, user)
+
+	CreateUserCache(w, r, user)
+
 }
 
 func apiUpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -21,12 +33,12 @@ func apiUpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, okId := parseId(w, r)
+	id, okId := ParseId(w, r)
 	if !okId {
 		return
 	}
 
-	user, okUsr := getUserById(id, w)
+	user, okUsr := GetUserById(id, w)
 	if !okUsr {
 		return
 	}
@@ -47,7 +59,7 @@ func apiGetAllUsers(w http.ResponseWriter, r *http.Request) {
 	if !okUsers {
 		return
 	}
-	sendData(users, w)
+	SendData(users, w)
 }
 
 func getUsers(w http.ResponseWriter) ([]mydb.User, bool) {
@@ -68,19 +80,22 @@ func apiGetUser(w http.ResponseWriter, r *http.Request) {
 	if !isMethodGET(w, r) {
 		return
 	}
-	userId, okId := parseId(w, r)
+
+	LoadUserCache(w, r)
+
+	userId, okId := ParseId(w, r)
 	if !okId {
 		return
 	}
 
-	user, okUser := getUserById(userId, w)
+	user, okUser := GetUserById(userId, w)
 	if !okUser {
 		return
 	}
-	sendData(user, w)
+	SendData(user, w)
 }
 
-func getUserById(userId int, w http.ResponseWriter) (*mydb.User, bool) {
+func GetUserById(userId int, w http.ResponseWriter) (*mydb.User, bool) {
 
 	user, err := mydb.FindUserById(userId)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -98,12 +113,12 @@ func apiDeleteUser(w http.ResponseWriter, r *http.Request) {
 	if !isMethodDELETE(w, r) {
 		return
 	}
-	id, okId := parseId(w, r)
+	id, okId := ParseId(w, r)
 	if !okId {
 		return
 	}
 
-	usr, okUsr := getUserById(id, w)
+	usr, okUsr := GetUserById(id, w)
 	if !okUsr {
 		return
 	}
@@ -116,12 +131,12 @@ func apiPharaohUser(w http.ResponseWriter, r *http.Request) {
 	if !isMethodDELETE(w, r) {
 		return
 	}
-	id, okId := parseId(w, r)
+	id, okId := ParseId(w, r)
 	if !okId {
 		return
 	}
 	var massivslice []mydb.UserCategories
-	usr, okUsr := getUserById(id, w)
+	usr, okUsr := GetUserById(id, w)
 	if !okUsr {
 		return
 	}

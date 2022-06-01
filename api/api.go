@@ -34,7 +34,7 @@ func InitBackendApi() {
 	http.HandleFunc("/API/pharaoh_user", apiPharaohUser)
 }
 
-func parseId(w http.ResponseWriter, r *http.Request) (int, bool) {
+func ParseId(w http.ResponseWriter, r *http.Request) (int, bool) {
 	keys, ok := r.URL.Query()["id"]
 	if !ok || len(keys[0]) < 1 {
 		w.WriteHeader(http.StatusBadRequest)
@@ -51,7 +51,7 @@ func parseId(w http.ResponseWriter, r *http.Request) (int, bool) {
 	return userId, true
 }
 
-func sendData(data interface{}, w http.ResponseWriter) {
+func SendData(data interface{}, w http.ResponseWriter) {
 	b, err := json.Marshal(data)
 	if err != nil {
 		log.Error(err)
