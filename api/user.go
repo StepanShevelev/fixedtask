@@ -24,8 +24,14 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 
 	mydb.CreateUser(r, user)
 
-	CreateUserCache(w, r, user)
+	Caching.SetCache(user.ID, user)
 
+	result, err := Caching.GetCache(user.ID)
+	if err != nil {
+		w.Write([]byte("an error occurred while getting cache"))
+		return
+	}
+	SendData(result, w)
 }
 
 func apiUpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -81,18 +87,25 @@ func apiGetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	LoadUserCache(w, r)
-
 	userId, okId := ParseId(w, r)
 	if !okId {
 		return
 	}
 
-	user, okUser := GetUserById(userId, w)
-	if !okUser {
+	//LoadUserCache(w, r)
+	result, err := Caching.GetCache(userId)
+	if err != nil {
+		w.Write([]byte("an error occurred while getting cache"))
 		return
 	}
-	SendData(user, w)
+	SendData(result, w)
+
+	//
+	//user, okUser := GetUserById(userId, w)
+	//if !okUser {
+	//	return
+	//}
+	//SendData(user, w)
 }
 
 func GetUserById(userId int, w http.ResponseWriter) (*mydb.User, bool) {
