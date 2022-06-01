@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	mydb "github.com/StepanShevelev/fixedtask/db"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -26,12 +27,12 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 
 	Caching.SetCache(user.ID, user)
 
-	result, err := Caching.GetCache(user.ID)
-	if err != nil {
-		w.Write([]byte("an error occurred while getting cache"))
-		return
-	}
-	SendData(result, w)
+	//result, err := Caching.GetCache(user.ID)
+	//if err != nil {
+	//	w.Write([]byte("an error occurred while getting cache"))
+	//	return
+	//}
+	//SendData(result, w)
 }
 
 func apiUpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -94,6 +95,7 @@ func apiGetUser(w http.ResponseWriter, r *http.Request) {
 
 	//LoadUserCache(w, r)
 	result, err := Caching.GetCache(userId)
+	fmt.Sprint(result)
 	if err != nil {
 		w.Write([]byte("an error occurred while getting cache"))
 		return

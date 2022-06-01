@@ -7,6 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"net/http"
+	"strconv"
 )
 
 func apiCreateCategory(w http.ResponseWriter, r *http.Request) {
@@ -118,13 +119,44 @@ func apiUserAddCategory(w http.ResponseWriter, r *http.Request) {
 	if !isMethodPOST(w, r) {
 		return
 	}
-	mydb.AddCategory(r)
-	var user mydb.User
-	var category mydb.Category
-	//
-	//
-	//
+
+	type UserCategoriesS struct {
+		UserId     int `json:"user_id"`
+		CategoryId int `json:"category_id"`
+	}
+	var category *mydb.Category
+	var user *mydb.User
+	var ids *UserCategoriesS
+
+	err := json.NewDecoder(r.Body).Decode(&ids)
+	if err != nil {
+		return
+	}
+	userHead := mydb.Database.Db.Find(&category, "id = ?", ids.CategoryId)
+	if userHead.Error != nil {
+		//c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
+		//mydb.UppendErrorWithPath(userHeader.Error)
+		return
+	}
+
+	userHeader := mydb.Database.Db.Find(&user, "id = ?", ids.UserId)
+	if userHeader.Error != nil {
+		//c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
+		//mydb.UppendErrorWithPath(userHeader.Error)
+		return
+	}
+
+	category.Users = append(category.Users, mydb.User{ID: ids.UserId})
+
 	mydb.Database.Db.Model(&category).Association("Users").Append(&user)
+	w.Write([]byte(strconv.Itoa(ids.UserId)))
+	Caching.SetCache(ids.UserId, user)
+	//var user mydb.User
+	//var category mydb.Category
+	//
+	//
+	//
+	//mydb.Database.Db.Model(&category).Association("Users").Append(&user)
 	//
 	//
 	//

@@ -2,7 +2,45 @@ package api
 
 import (
 	"github.com/bluele/gcache"
+	"time"
 )
+
+type Cache struct {
+	NewCache gcache.Cache
+}
+
+var Caching Cache
+
+func (c *Cache) CreteCache() gcache.Cache {
+
+	gc := gcache.New(50).
+		LRU().
+		Build()
+
+	Caching = Cache{
+		NewCache: gc,
+	}
+
+	return gc
+}
+
+func (c *Cache) SetCache(key interface{}, value interface{}) {
+	c.CreteCache()
+	err := Caching.NewCache.SetWithExpire(key, value, time.Minute*5)
+	if err != nil {
+		return
+	}
+
+}
+
+func (c *Cache) GetCache(key interface{}) (interface{}, error) {
+	get, err := Caching.NewCache.Get(key)
+	if err != nil {
+		return "", err
+	}
+
+	return get, nil
+}
 
 //func CreateUserCache(w http.ResponseWriter, user *mydb.User) {
 //	fmt.Println(user.Name)
@@ -68,40 +106,3 @@ import (
 //	SendData(value, w)
 //	return
 //}
-
-type Cache struct {
-	NewCache gcache.Cache
-}
-
-var Caching Cache
-
-func (c *Cache) CreteCache() gcache.Cache {
-
-	gc := gcache.New(50).
-		LRU().
-		Build()
-
-	Caching = Cache{
-		NewCache: gc,
-	}
-
-	return gc
-}
-
-func (c *Cache) SetCache(key interface{}, value interface{}) {
-	c.CreteCache()
-	err := Caching.NewCache.Set(key, value)
-	if err != nil {
-		return
-	}
-
-}
-
-func (c *Cache) GetCache(key interface{}) (interface{}, error) {
-	get, err := Caching.NewCache.Get(key)
-	if err != nil {
-		return "", err
-	}
-
-	return get, nil
-}

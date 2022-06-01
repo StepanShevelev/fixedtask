@@ -72,28 +72,40 @@ func CreateCategory(r *http.Request) {
 		return
 	}
 	Database.Db.Create(&category)
+	//Database.Db.Model(&category).Association("Users").Append(&user)
 }
 
 func AddCategory(r *http.Request) {
-
 	type UserCategoriesS struct {
-		UserId      int   `json:"user_id"`
-		CategoryIds []int `json:"category_ids"`
+		UserId     int `json:"user_id"`
+		CategoryId int `json:"category_id"`
 	}
+	var category *Category
+	var user *User
 	var ids *UserCategoriesS
-	var massivslice []UserCategories
 
 	err := json.NewDecoder(r.Body).Decode(&ids)
 	if err != nil {
 		return
 	}
-
-	for _, categoryId := range ids.CategoryIds {
-
-		massivslice = append(massivslice, UserCategories{UserId: ids.UserId, CategoryId: categoryId})
-
+	userHead := Database.Db.Find(&category, "id = ?", ids.CategoryId)
+	if userHead.Error != nil {
+		//c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
+		//mydb.UppendErrorWithPath(userHeader.Error)
+		return
 	}
-	Database.Db.Create(&massivslice)
+
+	userHeader := Database.Db.Find(&user, "id = ?", ids.UserId)
+	if userHeader.Error != nil {
+		//c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
+		//mydb.UppendErrorWithPath(userHeader.Error)
+		return
+	}
+
+	category.Users = append(category.Users, User{ID: ids.UserId})
+
+	Database.Db.Model(&category).Association("Users").Append(&user)
+
 }
 
 func DeleteCategory(r *http.Request) {
