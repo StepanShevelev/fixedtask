@@ -19,9 +19,10 @@ func (c *Cache) CreteCache() gcache.Cache {
 		LRU().
 		Build()
 
-	Caching = Cache{
-		UserCache: gc,
-	}
+	//Caching = Cache{
+	//	UserCache: gc,
+	//}
+	c.UserCache = gc
 
 	return gc
 }
@@ -31,9 +32,10 @@ func (c *Cache) CreteCateCache() gcache.Cache {
 		LRU().
 		Build()
 
-	Caching = Cache{
-		CategoryCache: gc,
-	}
+	//Caching = Cache{
+	//	CategoryCache: gc,
+	//}
+	c.CategoryCache = gc
 
 	return gc
 }

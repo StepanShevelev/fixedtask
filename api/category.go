@@ -196,8 +196,10 @@ func apiUserAddCategory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	category.Users = append(category.Users, mydb.User{ID: ids.UserId})
+	user.Categories = append(user.Categories, mydb.Category{ID: ids.CategoryId})
 
 	mydb.Database.Db.Model(&category).Association("Users").Append(&user)
+	mydb.Database.Db.Model(&user).Association("Categories").Append(&category)
 	w.Write([]byte(strconv.Itoa(ids.UserId)))
 
 	Caching.SetUserCache(ids.UserId, user)

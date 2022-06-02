@@ -32,6 +32,7 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 	result, err := Caching.GetUserCache(user.ID)
 	if err != nil {
 		w.Write([]byte("an error occurred while getting cache"))
+		w.Write([]byte(err.Error()))
 		return
 	}
 	SendData(&result, w)
@@ -54,6 +55,7 @@ func apiGetUser(w http.ResponseWriter, r *http.Request) {
 	//fmt.Sprint(result)
 	if err != nil {
 		w.Write([]byte("an error occurred while getting cache"))
+		w.Write([]byte(err.Error()))
 		return
 	}
 	SendData(&result, w)

@@ -18,11 +18,16 @@ func main() {
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
+
 	fmt.Println("starting server")
 	mydb.ConnectToDb()
 	fmt.Println("connected to db")
 	api.InitBackendApi()
 	fmt.Println("initialised routing")
+	api.Caching.CreteCateCache()
+	fmt.Println("initialised category cache")
+	api.Caching.CreteCache()
+	fmt.Println("initialised user cache")
 
 	//api.ShowSkill("Dog")
 
