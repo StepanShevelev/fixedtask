@@ -26,6 +26,7 @@ func (c *Cache) CreteCache() gcache.Cache {
 
 func (c *Cache) SetCache(key interface{}, value interface{}) {
 	c.CreteCache()
+
 	err := Caching.NewCache.SetWithExpire(key, value, time.Minute*5)
 	if err != nil {
 		return

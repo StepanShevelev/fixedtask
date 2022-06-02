@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	mydb "github.com/StepanShevelev/fixedtask/db"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -15,7 +16,26 @@ func apiCreateCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mydb.CreateCategory(r)
+	var category *mydb.Category
+
+	err := json.NewDecoder(r.Body).Decode(&category)
+	if err != nil {
+		w.Write([]byte("an error occurred while decoding json"))
+		return
+	}
+	key := "category" + strconv.Itoa(category.ID)
+	mydb.CreateCategory(r, category)
+	Caching.SetCache(key, category)
+
+	//
+	///
+	///
+	result, err := Caching.GetCache(key)
+	if err != nil {
+		w.Write([]byte("an error occurred while getting cache"))
+		return
+	}
+	SendData(&result, w)
 
 }
 
@@ -50,6 +70,7 @@ func apiGetAllCategories(w http.ResponseWriter, r *http.Request) {
 	if !okCats {
 		return
 	}
+
 	SendData(categories, w)
 }
 
@@ -71,16 +92,42 @@ func apiGetCategory(w http.ResponseWriter, r *http.Request) {
 	if !isMethodGET(w, r) {
 		return
 	}
-	categoryId, okId := ParseId(w, r)
-	if !okId {
+	//categoryId, okId := ParseId(w, r)
+	//if !okId {
+	//	return
+	//}
+	//
+	//category, okCat := getCategoryById(categoryId, w)
+	//if !okCat {
+	//	return
+	//}
+	var category *mydb.Category
+	err := json.NewDecoder(r.Body).Decode(&category)
+	if err != nil {
+		w.Write([]byte("an error occurred while decoding json"))
 		return
 	}
 
-	category, okCat := getCategoryById(categoryId, w)
-	if !okCat {
+	userHead := mydb.Database.Db.Find(&category, "name = ?", category.Name)
+	if userHead.Error != nil {
+		//c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
+		//mydb.UppendErrorWithPath(userHeader.Error)
 		return
 	}
-	SendData(category, w)
+
+	//categoryId, okId := ParseId(w, r)
+	//if !okId {
+	//	return
+	//}
+
+	//LoadUserCache(w, r)
+	result, err := Caching.GetCache(category.Name)
+	fmt.Sprint(result)
+	if err != nil {
+		w.Write([]byte("an error occurred while getting cache"))
+		return
+	}
+	SendData(result, w)
 }
 
 func getCategoryById(categoryId int, w http.ResponseWriter) (*mydb.Category, bool) {
@@ -121,12 +168,14 @@ func apiUserAddCategory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type UserCategoriesS struct {
-		UserId     int `json:"user_id"`
-		CategoryId int `json:"category_id"`
+		Username     string `json:"username"`
+		UserId       int    `json:"user_id"`
+		Categoryname string `json:"categoryname"`
+		CategoryId   int    `json:"category_id"`
 	}
 	var category *mydb.Category
 	var user *mydb.User
-	var ids *UserCategoriesS
+	var ids UserCategoriesS
 
 	err := json.NewDecoder(r.Body).Decode(&ids)
 	if err != nil {
@@ -150,7 +199,10 @@ func apiUserAddCategory(w http.ResponseWriter, r *http.Request) {
 
 	mydb.Database.Db.Model(&category).Association("Users").Append(&user)
 	w.Write([]byte(strconv.Itoa(ids.UserId)))
+
 	Caching.SetCache(ids.UserId, user)
+	Caching.SetCache(ids.CategoryId, category)
+
 	//var user mydb.User
 	//var category mydb.Category
 	//

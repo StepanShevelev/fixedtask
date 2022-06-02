@@ -31,7 +31,7 @@ func ConnectToDb() {
 	}
 }
 
-func CreateUser(r *http.Request, user *User) {
+func CreateUser(user *User) {
 	//var user *User
 
 	//err := json.NewDecoder(r.Body).Decode(&user)
@@ -64,49 +64,49 @@ func FindUsers() ([]User, error) {
 	return users, nil
 }
 
-func CreateCategory(r *http.Request) {
-	var category *Category
-
-	err := json.NewDecoder(r.Body).Decode(&category)
-	if err != nil {
-		return
-	}
+func CreateCategory(r *http.Request, category *Category) {
+	//var category *Category
+	//
+	//err := json.NewDecoder(r.Body).Decode(&category)
+	//if err != nil {
+	//	return
+	//}
 	Database.Db.Create(&category)
 	//Database.Db.Model(&category).Association("Users").Append(&user)
 }
 
-func AddCategory(r *http.Request) {
-	type UserCategoriesS struct {
-		UserId     int `json:"user_id"`
-		CategoryId int `json:"category_id"`
-	}
-	var category *Category
-	var user *User
-	var ids *UserCategoriesS
-
-	err := json.NewDecoder(r.Body).Decode(&ids)
-	if err != nil {
-		return
-	}
-	userHead := Database.Db.Find(&category, "id = ?", ids.CategoryId)
-	if userHead.Error != nil {
-		//c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
-		//mydb.UppendErrorWithPath(userHeader.Error)
-		return
-	}
-
-	userHeader := Database.Db.Find(&user, "id = ?", ids.UserId)
-	if userHeader.Error != nil {
-		//c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
-		//mydb.UppendErrorWithPath(userHeader.Error)
-		return
-	}
-
-	category.Users = append(category.Users, User{ID: ids.UserId})
-
-	Database.Db.Model(&category).Association("Users").Append(&user)
-
-}
+//func AddCategory(r *http.Request) {
+//	type UserCategoriesS struct {
+//		UserId     int `json:"user_id"`
+//		CategoryId int `json:"category_id"`
+//	}
+//	var category *Category
+//	var user *User
+//	var ids *UserCategoriesS
+//
+//	err := json.NewDecoder(r.Body).Decode(&ids)
+//	if err != nil {
+//		return
+//	}
+//	userHead := Database.Db.Find(&category, "id = ?", ids.CategoryId)
+//	if userHead.Error != nil {
+//		//c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
+//		//mydb.UppendErrorWithPath(userHeader.Error)
+//		return
+//	}
+//
+//	userHeader := Database.Db.Find(&user, "id = ?", ids.UserId)
+//	if userHeader.Error != nil {
+//		//c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
+//		//mydb.UppendErrorWithPath(userHeader.Error)
+//		return
+//	}
+//
+//	category.Users = append(category.Users, User{ID: ids.UserId})
+//
+//	Database.Db.Model(&category).Association("Users").Append(&user)
+//
+//}
 
 func DeleteCategory(r *http.Request) {
 

@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"net/http"
+	"strconv"
 )
 
 func apiCreateUser(w http.ResponseWriter, r *http.Request) {
@@ -22,17 +23,79 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("an error occurred while decoding json"))
 		return
 	}
+	key := "user" + strconv.Itoa(user.ID)
 
-	mydb.CreateUser(r, user)
+	mydb.CreateUser(user)
 
-	Caching.SetCache(user.ID, user)
+	Caching.SetCache(key, &user)
 
-	//result, err := Caching.GetCache(user.ID)
-	//if err != nil {
-	//	w.Write([]byte("an error occurred while getting cache"))
+	result, err := Caching.GetCache(key)
+	if err != nil {
+		w.Write([]byte("an error occurred while getting cache"))
+		return
+	}
+	SendData(&result, w)
+}
+
+func apiGetUser(w http.ResponseWriter, r *http.Request) {
+	if !isMethodGET(w, r) {
+		return
+	}
+
+	userId, okId := ParseId(w, r)
+	if !okId {
+		w.Write([]byte(`{"error": "can't pars id"}`))
+		return
+	}
+	fmt.Println(userId)
+	key := "user" + strconv.Itoa(userId)
+
+	result, err := Caching.GetCache(key)
+	//fmt.Sprint(result)
+	if err != nil {
+		w.Write([]byte("an error occurred while getting cache"))
+		return
+	}
+	SendData(&result, w)
+
+	//
+	//user, okUser := GetUserById(userId, w)
+	//if !okUser {
 	//	return
 	//}
-	//SendData(result, w)
+	//SendData(userId, w)
+}
+
+func GetUserById(userId int, w http.ResponseWriter) (*mydb.User, bool) {
+
+	user, err := mydb.FindUserById(userId)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		w.WriteHeader(http.StatusNotFound)
+		return nil, false
+	} else if err != nil {
+		log.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return nil, false
+	}
+	return user, true
+}
+
+func apiDeleteUser(w http.ResponseWriter, r *http.Request) {
+	if !isMethodDELETE(w, r) {
+		return
+	}
+	id, okId := ParseId(w, r)
+	if !okId {
+		return
+	}
+
+	usr, okUsr := GetUserById(id, w)
+	if !okUsr {
+		return
+	}
+
+	mydb.Database.Db.Unscoped().Delete(&usr)
+	w.WriteHeader(http.StatusOK)
 }
 
 func apiUpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -81,65 +144,6 @@ func getUsers(w http.ResponseWriter) ([]mydb.User, bool) {
 		return nil, false
 	}
 	return users, true
-}
-
-func apiGetUser(w http.ResponseWriter, r *http.Request) {
-	if !isMethodGET(w, r) {
-		return
-	}
-
-	userId, okId := ParseId(w, r)
-	if !okId {
-		return
-	}
-
-	//LoadUserCache(w, r)
-	result, err := Caching.GetCache(userId)
-	fmt.Sprint(result)
-	if err != nil {
-		w.Write([]byte("an error occurred while getting cache"))
-		return
-	}
-	SendData(result, w)
-
-	//
-	//user, okUser := GetUserById(userId, w)
-	//if !okUser {
-	//	return
-	//}
-	//SendData(user, w)
-}
-
-func GetUserById(userId int, w http.ResponseWriter) (*mydb.User, bool) {
-
-	user, err := mydb.FindUserById(userId)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		w.WriteHeader(http.StatusNotFound)
-		return nil, false
-	} else if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return nil, false
-	}
-	return user, true
-}
-
-func apiDeleteUser(w http.ResponseWriter, r *http.Request) {
-	if !isMethodDELETE(w, r) {
-		return
-	}
-	id, okId := ParseId(w, r)
-	if !okId {
-		return
-	}
-
-	usr, okUsr := GetUserById(id, w)
-	if !okUsr {
-		return
-	}
-
-	mydb.Database.Db.Unscoped().Delete(&usr)
-	w.WriteHeader(http.StatusOK)
 }
 
 func apiPharaohUser(w http.ResponseWriter, r *http.Request) {

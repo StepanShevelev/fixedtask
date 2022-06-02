@@ -21,9 +21,12 @@ type UserCategories struct {
 }
 
 type Category struct {
-	gorm.Model
-	Users []User `json:"users" db:"users" gorm:"many2many:user_categories;"`
-	Name  string `json:"name" db:"name"`
+	ID        int `gorm:"primarykey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *gorm.DeletedAt `gorm:"index"`
+	Users     []User          `json:"users" db:"users" gorm:"many2many:user_categories;"`
+	Name      string          `json:"name" db:"name"`
 }
 
 type Pet struct {
