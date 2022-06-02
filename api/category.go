@@ -23,14 +23,14 @@ func apiCreateCategory(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("an error occurred while decoding json"))
 		return
 	}
-	key := "category" + strconv.Itoa(category.ID)
+	//key := "category" + strconv.Itoa(category.ID)
 	mydb.CreateCategory(r, category)
-	Caching.SetCache(key, category)
+	Caching.SetCategoryCache(category.ID, category)
 
 	//
 	///
 	///
-	result, err := Caching.GetCache(key)
+	result, err := Caching.GetCategoryCache(category.ID)
 	if err != nil {
 		w.Write([]byte("an error occurred while getting cache"))
 		return
@@ -92,42 +92,42 @@ func apiGetCategory(w http.ResponseWriter, r *http.Request) {
 	if !isMethodGET(w, r) {
 		return
 	}
-	//categoryId, okId := ParseId(w, r)
-	//if !okId {
-	//	return
-	//}
+	categoryId, okId := ParseId(w, r)
+	if !okId {
+		return
+	}
 	//
 	//category, okCat := getCategoryById(categoryId, w)
 	//if !okCat {
 	//	return
 	//}
-	var category *mydb.Category
-	err := json.NewDecoder(r.Body).Decode(&category)
-	if err != nil {
-		w.Write([]byte("an error occurred while decoding json"))
-		return
-	}
 
-	userHead := mydb.Database.Db.Find(&category, "name = ?", category.Name)
-	if userHead.Error != nil {
-		//c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
-		//mydb.UppendErrorWithPath(userHeader.Error)
-		return
-	}
+	//var category *mydb.Category
+	//err := json.NewDecoder(r.Body).Decode(&category)
+	//if err != nil {
+	//	w.Write([]byte("an error occurred while decoding json"))
+	//	return
+	//}
+
+	//userHead := mydb.Database.Db.Find(&category, "id = ?", category.ID)
+	//if userHead.Error != nil {
+	//	//c.JSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
+	//	//mydb.UppendErrorWithPath(userHeader.Error)
+	//	return
+	//}
 
 	//categoryId, okId := ParseId(w, r)
 	//if !okId {
 	//	return
 	//}
 
-	//LoadUserCache(w, r)
-	result, err := Caching.GetCache(category.Name)
+	result, err := Caching.GetCategoryCache(categoryId)
 	fmt.Sprint(result)
 	if err != nil {
 		w.Write([]byte("an error occurred while getting cache"))
 		return
 	}
-	SendData(result, w)
+	SendData(&result, w)
 }
 
 func getCategoryById(categoryId int, w http.ResponseWriter) (*mydb.Category, bool) {
@@ -168,10 +168,10 @@ func apiUserAddCategory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type UserCategoriesS struct {
-		Username     string `json:"username"`
-		UserId       int    `json:"user_id"`
-		Categoryname string `json:"categoryname"`
-		CategoryId   int    `json:"category_id"`
+		//Username     string `json:"username"`
+		UserId int `json:"user_id"`
+		//Categoryname string `json:"categoryname"`
+		CategoryId int `json:"category_id"`
 	}
 	var category *mydb.Category
 	var user *mydb.User
@@ -200,8 +200,8 @@ func apiUserAddCategory(w http.ResponseWriter, r *http.Request) {
 	mydb.Database.Db.Model(&category).Association("Users").Append(&user)
 	w.Write([]byte(strconv.Itoa(ids.UserId)))
 
-	Caching.SetCache(ids.UserId, user)
-	Caching.SetCache(ids.CategoryId, category)
+	Caching.SetUserCache(ids.UserId, user)
+	Caching.SetCategoryCache(ids.CategoryId, category)
 
 	//var user mydb.User
 	//var category mydb.Category

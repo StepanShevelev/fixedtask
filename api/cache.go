@@ -6,7 +6,9 @@ import (
 )
 
 type Cache struct {
-	NewCache gcache.Cache
+	UserCache     gcache.Cache
+	CategoryCache gcache.Cache
+	NewCache      gcache.Cache
 }
 
 var Caching Cache
@@ -18,24 +20,35 @@ func (c *Cache) CreteCache() gcache.Cache {
 		Build()
 
 	Caching = Cache{
-		NewCache: gc,
+		UserCache: gc,
+	}
+
+	return gc
+}
+func (c *Cache) CreteCateCache() gcache.Cache {
+
+	gc := gcache.New(50).
+		LRU().
+		Build()
+
+	Caching = Cache{
+		CategoryCache: gc,
 	}
 
 	return gc
 }
 
-func (c *Cache) SetCache(key interface{}, value interface{}) {
+func (c *Cache) SetUserCache(key interface{}, value interface{}) {
 	c.CreteCache()
 
-	err := Caching.NewCache.SetWithExpire(key, value, time.Minute*5)
+	err := Caching.UserCache.SetWithExpire(key, value, time.Minute*5)
 	if err != nil {
 		return
 	}
-
 }
 
-func (c *Cache) GetCache(key interface{}) (interface{}, error) {
-	get, err := Caching.NewCache.Get(key)
+func (c *Cache) GetUserCache(key interface{}) (interface{}, error) {
+	get, err := Caching.UserCache.Get(key)
 	if err != nil {
 		return "", err
 	}
@@ -43,67 +56,39 @@ func (c *Cache) GetCache(key interface{}) (interface{}, error) {
 	return get, nil
 }
 
-//func CreateUserCache(w http.ResponseWriter, user *mydb.User) {
-//	fmt.Println(user.Name)
-//	fmt.Println(user.ID)
+func (c *Cache) SetCategoryCache(key interface{}, value interface{}) {
+	c.CreteCateCache()
+
+	err := Caching.CategoryCache.SetWithExpire(key, value, time.Minute*5)
+	if err != nil {
+		return
+	}
+}
+
+func (c *Cache) GetCategoryCache(key interface{}) (interface{}, error) {
+	get, err := Caching.CategoryCache.Get(key)
+	if err != nil {
+		return "", err
+	}
+
+	return get, nil
+}
+
+//func (c *Cache) SetCache(key interface{}, value interface{}) {
+//	c.CreteCache()
 //
-//	gc := gcache.New(50).
-//		LRU().
-//		Build()
-//	err := gc.Set(user.ID, user)
-//	value, err := gc.Get(user.ID)
-//	fmt.Println("Get:", value)
-//	fmt.Println(err)
+//	err := Caching.NewCache.SetWithExpire(key, value, time.Minute*5)
 //	if err != nil {
-//		w.Write([]byte("an error occurred while caching user data"))
 //		return
 //	}
-//	w.Write([]byte("success, user data has been cached"))
-//	SendData(value, w)
-//	return
 //
 //}
 //
-//func LoadUserCache(w http.ResponseWriter, r *http.Request) {
-//
-//	userId, ok := ParseId(w, r)
-//	if !ok {
-//		w.Write([]byte("an error occurred while parsing id"))
-//		return
+//func (c *Cache) GetCache(key interface{}) (interface{}, error) {
+//	get, err := Caching.NewCache.Get(key)
+//	if err != nil {
+//		return "", err
 //	}
 //
-//	//var evictCounter, purgeCounter int
-//	gc := gcache.New(20).
-//		LRU().
-//		//LoaderExpireFunc(func(key interface{}) (interface{}, *time.Duration, error) {
-//		//	loaderCounter++
-//		//	expire := 5 * time.Minute
-//		//	return "expired", &expire, nil
-//		//}).
-//		//EvictedFunc(func(key, value interface{}) {
-//		//	evictCounter++
-//		//	fmt.Println("evicted key:", key)
-//		//}).
-//		//PurgeVisitorFunc(func(key, value interface{}) {
-//		//	purgeCounter++
-//		//	fmt.Println("purged key:", key)
-//		//}).
-//		Build()
-//	fmt.Println(userId)
-//	value, _ := gc.Get(userId)
-//	fmt.Println(value)
-//	//if err == nil {
-//	//	w.Write([]byte("an error occurred while searching user data in cache"))
-//	//	return
-//	//}
-//
-//	//if loaderCounter != evictCounter+purgeCounter
-//	if value == nil {
-//
-//		w.Write([]byte("user not found"))
-//
-//	}
-//
-//	SendData(value, w)
-//	return
+//	return get, nil
 //}

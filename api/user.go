@@ -23,13 +23,13 @@ func apiCreateUser(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("an error occurred while decoding json"))
 		return
 	}
-	key := "user" + strconv.Itoa(user.ID)
+	//key := "user" + strconv.Itoa(user.ID)
 
 	mydb.CreateUser(user)
+	w.Write([]byte(strconv.Itoa(user.ID)))
+	Caching.SetUserCache(user.ID, user)
 
-	Caching.SetCache(key, &user)
-
-	result, err := Caching.GetCache(key)
+	result, err := Caching.GetUserCache(user.ID)
 	if err != nil {
 		w.Write([]byte("an error occurred while getting cache"))
 		return
@@ -48,9 +48,9 @@ func apiGetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(userId)
-	key := "user" + strconv.Itoa(userId)
+	//key := "user" + strconv.Itoa(userId)
 
-	result, err := Caching.GetCache(key)
+	result, err := Caching.GetUserCache(userId)
 	//fmt.Sprint(result)
 	if err != nil {
 		w.Write([]byte("an error occurred while getting cache"))
